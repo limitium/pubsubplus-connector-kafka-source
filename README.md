@@ -333,7 +333,7 @@ JDK 8 or higher is required for this project.
     ```
 3. Then run the build script:
    ```shell
-   gradlew clean build
+   ./gradlew clean build
    ```
 
 This script creates artifacts in the `build` directory, including the deployable packaged PubSub+ Source Connector archives under `build\distributions`.

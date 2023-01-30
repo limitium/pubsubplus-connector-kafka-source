@@ -19,13 +19,7 @@
 
 package com.solace.connector.kafka.connect.source;
 
-import com.solacesystems.jcsmp.ConsumerFlowProperties;
-import com.solacesystems.jcsmp.EndpointProperties;
-import com.solacesystems.jcsmp.FlowReceiver;
-import com.solacesystems.jcsmp.JCSMPException;
-import com.solacesystems.jcsmp.JCSMPFactory;
-import com.solacesystems.jcsmp.JCSMPProperties;
-import com.solacesystems.jcsmp.Queue;
+import com.solacesystems.jcsmp.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,16 +39,37 @@ public class SolaceSourceQueueConsumer {
 
   public void init(SolaceSourceTask solaceSourceTask) throws JCSMPException {
     solQueue = JCSMPFactory.onlyInstance().createQueue(lconfig.getString(SolaceSourceConstants.SOL_QUEUE));
+    addSubscriptions(solQueue);
     final ConsumerFlowProperties flow_prop = new ConsumerFlowProperties();
     flow_prop.setEndpoint(solQueue);
     flow_prop.setAckMode(JCSMPProperties.SUPPORTED_MESSAGE_ACK_CLIENT); // Will explicitly ack at commit
     flow_prop.setStartState(true);
     EndpointProperties endpointProps = new EndpointProperties();
-    endpointProps.setAccessType(EndpointProperties.ACCESSTYPE_NONEXCLUSIVE);
+    endpointProps.setAccessType(lconfig.getBoolean(SolaceSourceConstants.SOL_QUEUE_EXCLUSIVE) ? EndpointProperties.ACCESSTYPE_EXCLUSIVE : EndpointProperties.ACCESSTYPE_NONEXCLUSIVE);
     callbackhandler = new SolMessageQueueCallbackHandler(solaceSourceTask);
     recv = solSessionHandler.getSession().createFlow(callbackhandler, flow_prop, endpointProps,
         new SolFlowEventCallBackHandler());
     recv.start();
+  }
+
+  private void addSubscriptions(Queue solQueue) throws JCSMPException {
+    String topicsString = lconfig.getString(SolaceSourceConstants.SOL_QUEUE_TOPICS);
+    if (topicsString == null){
+      return;
+    }
+
+    String[] topics = topicsString.split(",");
+
+    Topic topic;
+    int counter = 0;
+    log.info("Number of topics to add: {} ", topics.length);
+    while (topics.length > counter) {
+      String topicName = topics[counter].trim();
+      log.info("Adding subscription for topic {} ", topicName);
+      topic = JCSMPFactory.onlyInstance().createTopic(topicName);
+      solSessionHandler.getSession().addSubscription(solQueue, topic, JCSMPSession.WAIT_FOR_CONFIRM & JCSMPSession.FLAG_IGNORE_ALREADY_EXISTS);
+      counter++;
+    }
   }
 
   public void stop() {

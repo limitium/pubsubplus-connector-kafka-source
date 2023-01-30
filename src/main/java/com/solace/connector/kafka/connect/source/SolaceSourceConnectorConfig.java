@@ -67,6 +67,10 @@ public class SolaceSourceConnectorConfig extends AbstractConfig {
             "Solace topic or list of topics to subscribe from")
         .define(SolaceSourceConstants.SOL_QUEUE, Type.STRING, null,
             Importance.MEDIUM, "Solace queue to consume from")
+        .define(SolaceSourceConstants.SOL_QUEUE_TOPICS, Type.STRING, null,
+            Importance.MEDIUM, "Topic or list of topics for queue to subscribe from")
+        .define(SolaceSourceConstants.SOL_QUEUE_EXCLUSIVE, Type.BOOLEAN, false,
+            Importance.MEDIUM, "Indicates that queues access is exclusive")
         .define(SolaceSourceConstants.SOL_MESSAGE_PROCESSOR, Type.CLASS, SolMessageProcessorIF.class,
             Importance.HIGH,
             "default Solace message processor to use")

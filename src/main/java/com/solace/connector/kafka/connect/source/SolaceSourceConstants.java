@@ -47,6 +47,8 @@ public class SolaceSourceConstants {
   public static final String SOL_VPN_NAME = "sol.vpn_name";
   public static final String SOL_TOPICS = "sol.topics";
   public static final String SOL_QUEUE = "sol.queue";
+  public static final String SOL_QUEUE_TOPICS = "sol.queue_topics";
+  public static final String SOL_QUEUE_EXCLUSIVE = "sol.queue_exclusive";
 
   // Low Importance General Properties
   public static final String SOL_SESSION_NAME = "sol.session_name";
